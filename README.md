@@ -43,6 +43,7 @@ Model Refinement: Fine-tune the LSTM model based on the insights gained from the
 - [Exploratory Data Analysis Notebook](#) - Exploring the event log data and identifying patterns.
 - [LSTM Model Notebook](#) - Building and training the LSTM model for event sequence monitoring.
 - [GRU Model Notebook](#) - Developing and evaluating the GRU model for detecting out-of-sequence events.
+- [capstone_project.csv](#) - The event data file.
 
 ##### Contact and Further Information
 For inquiries or additional information, please contact krista.rime@pluto.tv
