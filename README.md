@@ -25,15 +25,16 @@ The methodology involves the following steps:
 
 #### Results
 Both the LSTM and GRU models were trained and evaluated on historical event sequences to detect out-of-sequence events in the TVM ETL process. The performance of both models was assessed using accuracy and loss metrics.
-**LSTM Model**:
-     **Accuracy:** The LSTM model achieved an accuracy of 89.85% on the test dataset.
-     **Loss: **The test loss for the LSTM model was 0.3348.
-**GRU Model:**
-     **Accuracy:** Similarly, the GRU model achieved an accuracy of 89.55% on the test dataset.
-     **Loss:** The test loss for the GRU model was 0.3484.
-Both models demonstrated strong performance in detecting out-of-sequence events, with the LSTM model slightly outperforming the GRU model regarding accuracy and loss. The LSTM Model will be used to monitor the out-of-event sequences.
 
-#### Next Steps
+### LSTM Model:
+- **Accuracy:** The LSTM model achieved an accuracy of 89.85% on the test dataset.
+- **Loss:** The test loss for the LSTM model was 0.3348.
+
+### GRU Model:
+- **Accuracy:** Similarly, the GRU model achieved an accuracy of 89.55% on the test dataset.
+- **Loss:** The test loss for the GRU model was 0.3484.
+
+Both models demonstrated strong performance in detecting out-of-sequence events, with the LSTM model slightly outperforming the GRU model regarding accuracy and loss. The LSTM Model will be used to monitor the out-of-event sequences.
 Further Model Validation: Conduct additional validation checks to ensure the LSTM model accurately adheres to the event sequencing rules. This may involve testing the models on diverse datasets and edge cases to confirm their reliability in effectively detecting out-of-sequence events.
 Model Refinement: Fine-tune the LSTM model based on the insights gained from the validation process. Adjust model parameters, architecture, and training strategies to enhance performance, accuracy, and robustness in monitoring event sequences for the TVM ETL process.
 
