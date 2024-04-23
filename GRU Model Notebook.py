@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# # LTSM Model Development and Evaluation for Event Sequence Monitoring
+# # GRU Model Development and Evaluation for Event Sequence Monitoring
 # 
 # ## Introduction
-# This notebook explores the development and evaluation of a LTSM (Long Term Short Memory) model for event sequence monitoring in the TVM (Total Minutes Viewed) ETL (Extract, Transform, Load) process. The goal is to detect out-of-sequence events, which could have an impact on partner and product reporting.
+# This notebook explores the development and evaluation of a GRU (Gated Recurrent Unit) model for event sequence monitoring in the TVM (Total Minutes Viewed) ETL (Extract, Transform, Load) process. The goal is to detect out-of-sequence events, which could have an impact on partner and product reporting.
 # 
 # ## Data Preprocessing
 # The notebook begins with data preprocessing steps, including reading the event log data from a CSV file, converting timestamps to datetime objects, sorting the data based on event occurrence time, and dropping irrelevant columns like 'HIT_ID'. It also converts datetime features into Unix timestamps and handles missing values using SimpleImputer.
@@ -13,19 +13,19 @@
 # Sequencing rules are defined to determine the sequence of events based on specific criteria. Functions are created to mark events as in or out of sequence based on time differences between consecutive events.
 # 
 # ## Model Development and Training
-# The LTSM model is built using the Keras library. The notebook defines the architecture of the LTSM model with masking layers to handle variable-length input sequences. It compiles the model with appropriate loss and optimization functions and trains it using historical event sequences.
+# The GRU model is built using the Keras library. The notebook defines the architecture of the GRU model with masking layers to handle variable-length input sequences. It compiles the model with appropriate loss and optimization functions and trains it using historical event sequences.
 # 
 # ## Model Evaluation
-# The trained LTMS model is evaluated on a test dataset to assess its performance in detecting out-of-sequence events. The evaluation metrics include loss and accuracy.
+# The trained GRU model is evaluated on a test dataset to assess its performance in detecting out-of-sequence events. The evaluation metrics include loss and accuracy.
 # 
 # ## Results
-# The LTSM model achieves a certain level of accuracy and loss on the test dataset, indicating its effectiveness in monitoring event sequences in the TVM ETL process.
+# The GRU model achieves a certain level of accuracy and loss on the test dataset, indicating its effectiveness in monitoring event sequences in the TVM ETL process.
 # 
 # ## Conclusion
-# The notebook demonstrates the development, training, and evaluation of a LTSM model for event sequence monitoring. It provides insights into the performance of the model and its potential application in real-time monitoring systems.
+# The notebook demonstrates the development, training, and evaluation of a GRU model for event sequence monitoring. It provides insights into the performance of the model and its potential application in real-time monitoring systems.
 # 
 
-# In[8]:
+# In[2]:
 
 
 import pandas as pd
@@ -35,7 +35,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
 from keras.preprocessing.sequence import pad_sequences
 from keras.models import Sequential
-from keras.layers import LSTM, Dense, Masking
+from keras.layers import GRU, Dense, Masking
 
 # Define File Path
 file_path = "/Users/krista.rime/Documents/AIML/capstone_project.csv"
@@ -52,7 +52,7 @@ df.sort_values(by='EVENT_OCCURRED_UTC', inplace=True)
 # Reset index
 df.reset_index(drop=True, inplace=True)
 
-# Drop the 'HIT_ID'
+# Drop the 'HIT_ID' column 
 if 'HIT_ID' in df.columns:
     df.drop(columns=['HIT_ID'], inplace=True)
 
@@ -62,7 +62,6 @@ df['EVENT_OCCURRED_UNIX'] = df['EVENT_OCCURRED_UTC'].apply(lambda x: x.timestamp
 # Define X
 X = df.copy()
 
-# Preprocess the Data
 # Define datetime features and numerical features
 sequences = df.groupby(['CLIENT_ID', 'SESSION_ID'])
 datetime_features = df.select_dtypes(include=['datetime64']).columns
@@ -211,19 +210,19 @@ if 'EVENTNAME' in X_marked_aligned.columns and 'EVENTNAME' in y_aggregated_reset
         y_test = y_test.astype(np.float32)
 
         # Define the input shape
-        input_shape = (max_sequence_length, X_train_padded.shape[2])  # Shape of input data for LSTM
+        input_shape = (max_sequence_length, X_train_padded.shape[2])  # Shape of input data for GRU
 
-        # Define the LSTM model with Masking layer
+        # Define the GRU model with Masking layer
         model = Sequential()
         model.add(Masking(mask_value=0., input_shape=input_shape))  # Masking zero-padded values
-        model.add(LSTM(units=50))
+        model.add(GRU(units=50))
         model.add(Dense(units=1, activation='sigmoid'))
 
         # Compile the model
         model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 
-        # Train the model with validation data
-        history = model.fit(X_train_padded, y_train, epochs=10, batch_size=32, validation_data=(X_test_padded, y_test))
+        # Train the model
+        model.fit(X_train_padded, y_train, epochs=10, batch_size=32, validation_split=0.2)
 
         # Evaluate the model
         test_loss, test_accuracy = model.evaluate(X_test_padded, y_test)
@@ -235,7 +234,7 @@ else:
     print("Column 'EVENTNAME' not found in either X_marked_aligned or y_aggregated_reset.")
 
 
-# In[2]:
+# In[3]:
 
 
 from tabulate import tabulate
@@ -276,7 +275,7 @@ print("Out of Sequence Events:")
 print(out_of_sequence_events)
 
 
-# In[3]:
+# In[4]:
 
 
 # Mark events as in or out of sequence and identify out-of-sequence events
@@ -299,7 +298,7 @@ print("Out of Sequence Events:")
 print(tabulate(out_of_sequence_table, headers=headers, tablefmt='grid'))
 
 
-# In[4]:
+# In[11]:
 
 
 # Summarize the events out of sequence
@@ -359,38 +358,6 @@ print("\nTotal Count of Session IDs with Out-of-Sequence Events:", total_session
 print("Percentage of Session IDs with Out-of-Sequence Events:", percentage_sessions_with_out_of_sequence, "%")
 print("\nTotal Count of Client IDs with Out-of-Sequence Events:", total_clients_with_out_of_sequence)
 print("Percentage of Client IDs with Out-of-Sequence Events:", percentage_clients_with_out_of_sequence, "%")
-
-
-# In[10]:
-
-
-# Train the model with validation data
-history = model.fit(X_train_padded, y_train, epochs=10, batch_size=32, validation_data=(X_test_padded, y_test))
-
-# Check if loss and accuracy are tracked in the history
-if 'loss' in history.history and 'val_loss' in history.history:
-    # Visualize training loss and validation loss
-    plt.plot(history.history['loss'], label='Training Loss')
-    plt.plot(history.history['val_loss'], label='Validation Loss')
-    plt.xlabel('Epochs')
-    plt.ylabel('Loss')
-    plt.title('Training and Validation Loss')
-    plt.legend()
-    plt.show()
-else:
-    print("Loss history not found in model's history.")
-
-if 'accuracy' in history.history and 'val_accuracy' in history.history:
-    # Visualize training accuracy and validation accuracy
-    plt.plot(history.history['accuracy'], label='Training Accuracy')
-    plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
-    plt.xlabel('Epochs')
-    plt.ylabel('Accuracy')
-    plt.title('Training and Validation Accuracy')
-    plt.legend()
-    plt.show()
-else:
-    print("Accuracy history not found in model's history.")
 
 
 # In[ ]:
